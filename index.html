@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>BLACKMARKET ZK SYSTEM</title>
+
+<style>
+
+body{
+font-family:Segoe UI;
+background:#0f172a;
+color:white;
+margin:0;
+}
+
+header{
+background:#020617;
+padding:15px;
+font-size:22px;
+font-weight:bold;
+text-align:center;
+border-bottom:2px solid #ef4444;
+}
+
+.container{
+display:flex;
+}
+
+.sidebar{
+width:220px;
+background:#020617;
+height:100vh;
+padding:10px;
+}
+
+.sidebar button{
+width:100%;
+padding:12px;
+margin-top:8px;
+background:#1e293b;
+border:none;
+color:white;
+cursor:pointer;
+}
+
+.sidebar button:hover{
+background:#ef4444;
+}
+
+.main{
+flex:1;
+padding:20px;
+}
+
+.card{
+background:#1e293b;
+padding:15px;
+border-radius:10px;
+margin-bottom:15px;
+display:flex;
+justify-content:space-between;
+align-items:center;
+}
+
+.card input{
+width:60px;
+}
+
+.login{
+display:flex;
+justify-content:center;
+align-items:center;
+height:100vh;
+flex-direction:column;
+}
+
+button{
+padding:6px 12px;
+border:none;
+cursor:pointer;
+}
+
+.cart{
+background:#020617;
+padding:15px;
+margin-top:20px;
+border-radius:10px;
+}
+
+</style>
+</head>
+
+<body>
+
+<!-- LOGIN -->
+
+<div id="loginPage" class="login">
+
+<h2>BLACKMARKET LOGIN</h2>
+
+<input id="username" placeholder="Username"><br>
+<input id="password" type="password" placeholder="Password"><br>
+
+<button onclick="login()">Login</button>
+
+</div>
+
+
+<!-- WEBSITE -->
+
+<div id="mainSite" style="display:none;">
+
+<header>
+
+BLACKMARKET ZK STORE
+
+<button onclick="logout()" style="float:right;">Logout</button>
+
+</header>
+
+<div class="container">
+
+<div class="sidebar">
+
+<button onclick="showPage('store')">Weapon Store</button>
+<button onclick="showPage('cart')">Cart</button>
+<button onclick="showPage('history')">Purchase History</button>
+
+</div>
+
+
+<div class="main">
+
+<!-- STORE -->
+
+<div id="store">
+
+<h2>Weapon Shop</h2>
+
+<div class="card">
+
+<div>
+<h3>Thomson</h3>
+<p>850.000</p>
+</div>
+
+<input type="number" id="qtythomson" value="1">
+
+<button onclick="buyItem('thomson',850.000,'qtythomson')">Add</button>
+
+</div>
+
+<div class="card">
+
+<div>
+<h3>PPSH41</h3>
+<p>750.000</p>
+</div>
+
+<input type="number" id="qtyPPSH41" value="1">
+
+<button onclick="buyItem('PPSH41',750.000,'qtyPPSH41')">Add</button>
+
+</div>
+
+<div class="card">
+
+<div>
+<h3>DE</h3>
+<p>500.000</p>
+</div>
+
+<input type="number" id="qtyDE" value="1">
+
+<button onclick="buyItem('DE',500.000,'qtyDE')">Add</button>
+
+</div>
+
+<div class="card">
+
+<div>
+<h3>Kevlar</h3>
+<p>150.000</p>
+</div>
+
+<input type="number" id="qtySniper" value="1">
+
+<button onclick="buyItem('Kevlar',150.000,'qtyKevlar')">Add</button>
+
+</div>
+
+</div>
+
+
+<!-- CART -->
+
+<div id="cart" style="display:none;">
+
+<h2>Your Cart</h2>
+
+<input id="buyerName" placeholder="Nama Pembeli"><br>
+
+<select id="paymentStatus">
+
+<option>Belum Dibayar</option>
+<option>Sudah Dibayar</option>
+
+</select>
+
+<div class="cart" id="cartItems"></div>
+
+<h3 id="total"></h3>
+
+<button onclick="checkout()">Checkout</button>
+
+</div>
+
+
+<!-- HISTORY -->
+
+<div id="history" style="display:none;">
+
+<h2>Purchase History</h2>
+
+<div class="cart" id="historyList"></div>
+
+</div>
+
+</div>
+</div>
+</div>
+
+
+<script>
+
+let cart=[]
+let total=0
+
+let history=JSON.parse(localStorage.getItem("rp_purchase"))||[]
+
+
+/* LOGIN */
+
+function login(){
+
+let user=document.getElementById("username").value
+let pass=document.getElementById("password").value
+
+if(user=="admin" && pass=="12345"){
+
+localStorage.setItem("login","true")
+
+document.getElementById("loginPage").style.display="none"
+document.getElementById("mainSite").style.display="block"
+
+}else{
+
+alert("Login salah")
+
+}
+
+}
+
+function logout(){
+
+localStorage.removeItem("login")
+location.reload()
+
+}
+
+if(localStorage.getItem("login")=="true"){
+
+document.getElementById("loginPage").style.display="none"
+document.getElementById("mainSite").style.display="block"
+
+}
+
+
+/* STORE */
+
+function buyItem(name,price,qtyId){
+
+let qty=parseInt(document.getElementById(qtyId).value)
+
+cart.push({name,price,qty})
+
+total+=price*qty
+
+updateCart()
+
+}
+
+function updateCart(){
+
+let box=document.getElementById("cartItems")
+
+box.innerHTML=""
+
+cart.forEach(i=>{
+
+box.innerHTML+=`<p>${i.name} x${i.qty} - $${i.price*i.qty}</p>`
+
+})
+
+document.getElementById("total").innerText="Total: $"+total
+
+}
+
+
+/* CHECKOUT */
+
+function checkout(){
+
+let buyer=document.getElementById("buyerName").value
+let status=document.getElementById("paymentStatus").value
+
+if(buyer==""){
+alert("Masukkan nama pembeli")
+return
+}
+
+if(cart.length==0){
+alert("Cart kosong")
+return
+}
+
+let purchase={
+
+buyer:buyer,
+status:status,
+date:new Date().toLocaleString(),
+items:cart,
+total:total
+
+}
+
+history.push(purchase)
+
+localStorage.setItem("rp_purchase",JSON.stringify(history))
+
+cart=[]
+total=0
+
+updateCart()
+loadHistory()
+
+alert("Transaksi disimpan")
+
+}
+
+
+/* DELETE */
+
+function deleteHistory(index){
+
+history.splice(index,1)
+
+localStorage.setItem("rp_purchase",JSON.stringify(history))
+
+loadHistory()
+
+}
+
+
+/* EDIT */
+
+function editHistory(index){
+
+let newBuyer=prompt("Edit nama pembeli:",history[index].buyer)
+
+let newStatus=prompt("Edit status pembayaran:",history[index].status)
+
+if(newBuyer!=null && newBuyer!=""){
+history[index].buyer=newBuyer
+}
+
+if(newStatus!=null && newStatus!=""){
+history[index].status=newStatus
+}
+
+localStorage.setItem("rp_purchase",JSON.stringify(history))
+
+loadHistory()
+
+}
+
+
+/* LOAD HISTORY */
+
+function loadHistory(){
+
+let box=document.getElementById("historyList")
+
+box.innerHTML=""
+
+history.forEach((p,index)=>{
+
+box.innerHTML+=`
+
+<div style="margin-bottom:15px">
+
+<p>
+
+<b>Pembeli:</b> ${p.buyer}<br>
+<b>Status:</b> ${p.status}<br>
+<b>Tanggal:</b> ${p.date}<br>
+<b>Item:</b> ${p.items.map(i=>i.name+" x"+i.qty).join(", ")}<br>
+<b>Total:</b> $${p.total}
+
+</p>
+
+<button onclick="editHistory(${index})" style="background:orange;color:white;">Edit</button>
+
+<button onclick="deleteHistory(${index})" style="background:red;color:white;">Hapus</button>
+
+</div>
+
+<hr>
+
+`
+
+})
+
+}
+
+
+/* NAVIGATION */
+
+function showPage(page){
+
+document.getElementById("store").style.display="none"
+document.getElementById("cart").style.display="none"
+document.getElementById("history").style.display="none"
+
+document.getElementById(page).style.display="block"
+
+}
+
+loadHistory()
+
+</script>
+
+</body>
+</html>
